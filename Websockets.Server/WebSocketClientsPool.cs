@@ -1,7 +1,7 @@
 ﻿using nanoframework.System.Net.Websockets;
 using System;
 using System.Collections;
-
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 
@@ -13,7 +13,8 @@ namespace nanoframework.System.Net.Websockets.Server
         public int Max { get; private set; }
         private object _poolLock = new object();
         public int Count { get => _webSocketClients.Count; }
-        public ICollection List => _webSocketClients.Keys;
+        public string[] List {get => GetList();}
+
 
         public WebSocketClientsPool(int maxClients)
         {
@@ -28,7 +29,15 @@ namespace nanoframework.System.Net.Websockets.Server
             {
                 lock (_poolLock)
                 {
-                    _webSocketClients.Add(webSocket.RemotEndPoint, webSocket);
+                    if(!string.IsNullOrEmpty(webSocket.RemoteEndPoint.ToString()))
+                    {
+                        _webSocketClients.Add(webSocket.RemoteEndPoint.ToString(), webSocket);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("heuh");
+                    }
+                    
                 }
                 return true;
             }
@@ -38,28 +47,43 @@ namespace nanoframework.System.Net.Websockets.Server
             }
         }
         
-        public bool Remove(IPEndPoint endPoint)
+        public bool Remove(string endPoint)
         {
             
             lock (_poolLock)
             {
-                if (!Contains(endPoint)) return false;
+                if (!Contains(endPoint.ToString())) return false;
                 _webSocketClients.Remove(endPoint);
             }
 
             return true;           
         }
 
-        public bool Contains(IPEndPoint endPoint)
+        public bool Contains(string endPoint)
         {
-            return _webSocketClients.Contains(endPoint);
+            lock (_poolLock)
+            {
+                return _webSocketClients.Contains(endPoint.ToString());
+            }
         }
 
-        public WebSocket Get(IPEndPoint endPoint)
+        public WebSocket Get(string endPoint)
         {
-            return (WebSocket)_webSocketClients[endPoint];
+            lock (_poolLock)
+            {
+                return (WebSocket)_webSocketClients[endPoint];
+            }
         }
 
+        private string[] GetList()
+        {
+            lock (_poolLock)
+            {
+                string[] list = new string[_webSocketClients.Count];
+                _webSocketClients.Keys.CopyTo(list, 0);
+                return list;
+            }
+        }
 
     }
 }
