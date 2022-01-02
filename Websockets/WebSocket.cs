@@ -23,6 +23,7 @@ namespace System.Net.WebSockets
         internal bool Pinging = false;
         internal DateTime PingTime = DateTime.UtcNow;
         internal NetworkStream ReceiveStream;
+        internal Socket NetworkSocket;
         internal bool HasError = false;
 
         internal WebSocketSender _webSocketSender;
@@ -122,11 +123,13 @@ namespace System.Net.WebSockets
         /// stream, which represents a web socket connection.
         /// </summary>
         /// <param name="stream">The stream for the connection.</param>
+        /// <param name="networkSocket">The socket for the connection.</param>
         /// <param name="isServer"><see langword="true"/> to indicate it's the server-side of the connection; <see langword="false"/> if it's the client-side.</param>
         /// <param name="remoteEndPoint">The Remote Endpoint where the WebSocket connects to.</param>
-        protected void ConnectToStream(NetworkStream stream, bool isServer, IPEndPoint remoteEndPoint)
+        protected void ConnectToStream(NetworkStream stream, Socket networkSocket, bool isServer, IPEndPoint remoteEndPoint)
         {
             ReceiveStream = stream;
+            NetworkSocket = networkSocket;
             IsServer = isServer;
             RemoteEndPoint = remoteEndPoint;
             LastContactTimeStamp = DateTime.UtcNow;
@@ -292,6 +295,8 @@ namespace System.Net.WebSockets
 
             StopReceiving();
             _webSocketSender.StopSender();
+            ReceiveStream.Close();
+            NetworkSocket.Close();
 
             Debug.WriteLine($"Connection - {RemoteEndPoint.ToString()} - Closed");
          

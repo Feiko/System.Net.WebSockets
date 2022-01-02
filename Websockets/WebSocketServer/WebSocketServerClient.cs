@@ -17,9 +17,9 @@ namespace System.Net.WebSockets.Server
             
         }
 
-        internal void ConnectToStream(NetworkStream stream, IPEndPoint remoteEndPoint, MessageReceivedEventHandler messageReceivedHandler)
+        internal void ConnectToStream(NetworkStream stream, Socket networkSocket, IPEndPoint remoteEndPoint, MessageReceivedEventHandler messageReceivedHandler)
         {
-            ConnectToStream(stream, true, remoteEndPoint);
+            ConnectToStream(stream, networkSocket, true, remoteEndPoint);
             base.MessageReceived += messageReceivedHandler;
         }
     }

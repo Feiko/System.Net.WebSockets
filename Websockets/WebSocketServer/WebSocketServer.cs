@@ -338,7 +338,7 @@ namespace System.Net.WebSockets.Server
                             networkStream.Write(response, 0, response.Length);
 
                             var webSocketClient = new WebSocketServerClient(_options);
-                            webSocketClient.ConnectToStream(networkStream, (IPEndPoint)networkSocket.RemoteEndPoint, onMessageReceived);
+                            webSocketClient.ConnectToStream(networkStream, networkSocket, (IPEndPoint)networkSocket.RemoteEndPoint, onMessageReceived);
                             if (_webSocketClientsPool.Add(webSocketClient))
                             { //check if clients are not full again
                                 WebSocketOpened?.Invoke(this, new WebSocketOpenedEventArgs() { EndPoint = webSocketClient.RemoteEndPoint });
@@ -355,6 +355,7 @@ namespace System.Net.WebSockets.Server
                     else
                     {
                         networkStream.Close();
+                        networkSocket.Close();
                         return false;
                     }
                 }
@@ -362,6 +363,7 @@ namespace System.Net.WebSockets.Server
             else
             {
                 networkStream.Close();
+                networkSocket.Close();
                 return false;
             }
 

@@ -262,7 +262,7 @@ namespace System.Net.WebSockets
                 throw new Exception("WebSocket did not receive right handshake");
             }
 
-            ConnectToStream(_networkStream, false, remoteEndPoint);
+            ConnectToStream(_networkStream, _tcpSocket, false, remoteEndPoint);
 
 
 
